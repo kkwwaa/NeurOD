@@ -147,6 +147,12 @@ def view_patient(request, pk):
 
         severity_num = []
         for answer in modality_numeric_answers:
+            proba = answer.proba
+            num = answer.num
+            if proba not in max_num_dict or num > max_num_dict[proba]:
+                max_num_dict[proba] = num
+              
+        for answer in modality_numeric_answers:
             if answer.proba in max_num_dict and answer.num == max_num_dict[answer.proba]:
                 total_score += answer.answer
                 question = answer.question
@@ -293,14 +299,11 @@ def proba(request, pk, proba_pk):
 
     if request.method == 'POST':
 
-        # Обработка отправленных ответов на вопросы
         for question in questions:
             answer_option_id = request.POST.get(f'question_{question.id}', None)
             if answer_option_id is not None:
-                # Получение модальности из связи вопрос-модальность
                 modal = question.modality
-
-                # Создание объекта PatientAnswer и сохранение в БД с указанием модальности или None
+              
                 PatientAnswer.objects.create(
                     patient_id=pk,
                     question=question,
@@ -311,15 +314,13 @@ def proba(request, pk, proba_pk):
                 )
 
         for numeric_question in numeric_questions:
-            total_sum = 0  # Переменная для хранения суммы ответов на числовой вопрос
+            total_sum = 0  
             for option in numeric_question.options.all():
                 numeric_answer_value = request.POST.get(f'numeric_question_{numeric_question.id}_{option.id}', None)
                 if numeric_answer_value is not None:
-                    # Получение модальности из связи вопрос-модальность
                     modal = numeric_question.modality
                     total_sum += int(numeric_answer_value) * option.coefficient
 
-                    # Создание объекта PatientNumericAnswer и сохранение в БД с указанием модальности или None
             PatientNumericAnswer.objects.create(
                 patient_id=pk,
                 question=numeric_question,
@@ -329,7 +330,7 @@ def proba(request, pk, proba_pk):
                 num=num1,
             )
 
-        return redirect('probs_list', pk=pk)  # Перенаправление на страницу успешного сохранения ответов
+        return redirect('probs_list', pk=pk)  
 
     context = {
         'prob': proba,
