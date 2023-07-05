@@ -1,3 +1,18 @@
+# NeurOD
+
+## How-to
+
+1. docker-compose up
+2. Init DB and create super user:
+
+```bash
+docker compose exec web python /app/manage.py makemigrations
+docker compose exec web python /app/manage.py migrate
+docker compose exec web python /app/manage.py createsuperuser
+```
+
+3. Access `127.0.0.1:8080/admin`
+
 <h1 align="center">NeuroDiagnost
 <img src="https://github.com/kkwwaa/NeurOD/blob/main/amscsait/static/image/Ner (1) (1).png" height="50"/></h1>
 <h2>screenshots</h2>
@@ -13,4 +28,3 @@
 <img src='https://github.com/kkwwaa/NeurOD/assets/120415812/ebb03d51-62ff-4c4c-a873-f37fe23efb48' alt='tables'>
 <h3>Graph</h3>
 <img src='https://github.com/kkwwaa/NeurOD/assets/120415812/a384032d-4455-423c-b9a5-0d8893f83e5a'>
-
