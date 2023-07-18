@@ -22,11 +22,11 @@ COPY amscsait /app
 COPY gunicorn.conf.py /app
 
 # Expose the port the app will run on
-EXPOSE 8080
+EXPOSE 8000
 
 # python /app/manage.py makemigrations
 # python /app/manage.py migrate
 # python /app/manage.py createsuperuser
 
 # Start the application using Gunicorn
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "--bind", "0.0.0.0:8080", "--log-level", "debug", "amscsait.wsgi:application"]
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "--bind", "0.0.0.0:8000", "--log-level", "debug", "amscsait.wsgi:application"]
