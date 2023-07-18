@@ -6,7 +6,7 @@ services:
     volumes:
       - static_volume:/app/staticfiles
     ports:
-      - 8080:80
+      - 8090:80
     depends_on:
       - web
   web:
