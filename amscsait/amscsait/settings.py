@@ -24,7 +24,9 @@ SECRET_KEY = "django-insecure-wtpyzy(p4hr9w^6*_&)=$#fpv)zl=-z(l3qpq==x%f^60h2va(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["neurod.sytkovo.su", "127.0.0.1"]
+
+CSRF_TRUSTED_ORIGINS = ["https://neurod.sytkovo.su"]
 
 # Application definition
 
