@@ -9,6 +9,7 @@
 docker compose exec web python /app/manage.py makemigrations
 docker compose exec web python /app/manage.py migrate
 docker compose exec web python /app/manage.py createsuperuser
+docker compose exec web python /app/manage.py collectstatic
 ```
 
 3. Access `127.0.0.1:8080/admin`
