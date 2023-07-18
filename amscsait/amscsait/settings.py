@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wtpyzy(p4hr9w^6*_&)=$#fpv)zl=-z(l3qpq==x%f^60h2va("
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["neurod.sytkovo.su"]
 
 # Application definition
 
