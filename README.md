@@ -2,8 +2,9 @@
 
 ## How-to
 
-1. docker-compose up
-2. Init DB and create super user:
+1. Customize values in django.env and postgres.env
+2. docker-compose up
+3. Init DB, create super user, collect static files:
 
 ```bash
 docker compose exec web python /app/manage.py makemigrations
@@ -12,7 +13,7 @@ docker compose exec web python /app/manage.py createsuperuser
 docker compose exec web python /app/manage.py collectstatic
 ```
 
-3. Access `127.0.0.1:8080/admin`
+4. Access `127.0.0.1:8080/admin`
 
 <h1 align="center">NeuroDiagnost
 <img src="https://github.com/kkwwaa/NeurOD/blob/main/amscsait/static/image/Ner (1) (1).png" height="50"/></h1>
