@@ -13,7 +13,7 @@ docker compose exec web python /app/manage.py createsuperuser
 docker compose exec web python /app/manage.py collectstatic
 ```
 
-4. Access `127.0.0.1:8080/admin`
+4. Access `127.0.0.1:8090/admin`
 
 <h1 align="center">NeuroDiagnost
 <img src="https://github.com/kkwwaa/NeurOD/blob/main/amscsait/static/image/Ner (1) (1).png" height="50"/></h1>
