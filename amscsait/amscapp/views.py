@@ -332,9 +332,15 @@ def proba(request, pk, proba_pk):
 
         return redirect('probs_list', pk=pk)  
 
+    try:
+        proba_image = ProbsImage.objects.get(prob=proba)
+    except ProbsImage.DoesNotExist:
+        proba_image = None
+
     context = {
         'prob': proba,
         'questions': questions,
+        'proba_image': proba_image,
         'numeric_questions': numeric_questions,
     }
 
