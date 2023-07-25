@@ -99,6 +99,9 @@ def set_block_from_modal(sender, instance, **kwargs):
     if not instance.block:  # Проверяем, если поле block не заполнено
         instance.block = instance.modal.block
 
+class ProbsImage(models.Model):
+    prob = models.ForeignKey(Probs, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='static/image/probs_img/')
 
 class PatientAnswer(models.Model):
     patient = models.ForeignKey(to="Patient", on_delete=models.CASCADE)
