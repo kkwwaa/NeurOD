@@ -50,16 +50,24 @@ def create_patient(request):
     )
 
 
-def get_severity(score, mean, std_dev):
+def get_severity(score, mean, std_dev, rev=False):
     lower_bound = abs(mean - std_dev)
     upper_bound = mean + std_dev
 
-    if score <= lower_bound:
-        return "Выше среднего"
-    elif score > math.ceil(upper_bound):
-        return "Ниже среднего"
+    if rev:
+        if score >= lower_bound:
+            return "Выше среднего"
+        elif score < math.ceil(upper_bound):
+            return "Ниже среднего"
+        else:
+            return "Средне"
     else:
-        return "Средне"
+        if score <= lower_bound:
+            return "Выше среднего"
+        elif score > math.ceil(upper_bound):
+            return "Ниже среднего"
+        else:
+            return "Средне"
 
 
 def score_severity(severity_num):
@@ -110,8 +118,6 @@ def generate_dataframe(results):
 def view_patient(request, pk):
     patient = get_object_or_404(Patient, pk=pk, user=request.user)
     modalities = Modality.objects.all()
-    questions = Question.objects.filter(modality__isnull=False).distinct()
-    num_questions = NumericQuestion.objects.filter(modality__isnull=False).distinct()
     results = []
     modality_names = []
     score_sums = []
@@ -147,12 +153,6 @@ def view_patient(request, pk):
 
         severity_num = []
         for answer in modality_numeric_answers:
-            proba = answer.proba
-            num = answer.num
-            if proba not in max_num_dict or num > max_num_dict[proba]:
-                max_num_dict[proba] = num
-              
-        for answer in modality_numeric_answers:
             if answer.proba in max_num_dict and answer.num == max_num_dict[answer.proba]:
                 total_score += answer.answer
                 question = answer.question
@@ -160,17 +160,17 @@ def view_patient(request, pk):
 
                 if avg_value is not None:
                     std_dev = abs(question.max_value - question.min_value) / 4
-                    severity_num.append((get_severity(answer.answer, avg_value, std_dev), answer.created_at))
+                    severity_num.append(
+                        (get_severity(answer.answer, avg_value, std_dev, question.rev), answer.created_at))
 
                 score_sum += score_severity(severity_num[-1][0])
                 answers.append(answer)
 
-        if (questions.filter(modality=modality).count() + num_questions.filter(modality=modality).count()) != 0:
-            score_sum = (score_sum / (questions.filter(modality=modality).count() + num_questions.filter(
-                modality=modality).count())) * 100
-
         answers = sorted(answers, key=lambda x: x.created_at)
         severity = sorted(severity + severity_num, key=lambda x: x[1])
+
+        if len(severity) != 0:
+            score_sum = (score_sum / len(severity)) * 100
 
         result = {
             "modality": modality,
