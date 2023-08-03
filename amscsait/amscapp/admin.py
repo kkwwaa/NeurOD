@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from import_export.widgets import ForeignKeyWidget
 
-from .models import Option,Block, Modality, PatientNumericAnswer, PatientAnswer, Patient, Question, Probs, NumericQuestion,NumericOption
+from .models import Option,Block, Modality, PatientNumericAnswer, PatientAnswer, Patient, Question, Probs, NumericQuestion,NumericOption, ProbsImage
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 
