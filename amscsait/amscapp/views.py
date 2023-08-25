@@ -7,7 +7,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from .forms import (PatientForm, UserLoginForm,
                     UserRegisterForm, OptionForm)
-from .models import Patient, PatientAnswer, Block, Probs, Modality, Question, PatientNumericAnswer, NumericQuestion
+from .models import Patient, PatientAnswer, Block, Probs, Modality, Question, PatientNumericAnswer, NumericQuestion, ProbsImage
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
