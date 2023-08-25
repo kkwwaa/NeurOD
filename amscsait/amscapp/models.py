@@ -29,7 +29,7 @@ class Question(models.Model):
     type_ = QuestionType.POLL
     question_text = models.CharField("Текст вопроса", max_length=100)
     proba = models.ForeignKey(to="Probs", on_delete=models.CASCADE)
-    modality = models.ForeignKey(Modality, on_delete=models.CASCADE, null=True, blank=True)
+    modality = models.ManyToManyField(Modality)
     avg_value = models.FloatField("Среднее значение", null=True, blank=True)
     min_value = models.FloatField("Минимальное значение", null=True, blank=True)
     max_value = models.FloatField("Максимальное значение", null=True, blank=True)
