@@ -18,16 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = "django-insecure-wtpyzy(p4hr9w^6*_&)=$#fpv)zl=-z(l3qpq==x%f^60h2va("
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get("DEBUG", default=0))
+DEBUG = True
 
-# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
-# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -79,14 +76,15 @@ WSGI_APPLICATION = "amscsait.wsgi.application"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get("SQL_DB", "postgres"),
-        'USER': os.environ.get("SQL_USER", "postgres"),
-        'PASSWORD': os.environ.get("SQL_PASSWORD", "postgres"),
-        'HOST': os.environ.get("SQL_HOST", "db"),
-        'PORT': os.environ.get("SQL_PORT", "5432"),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'NeurOD1',
+        'USER': 'postgres',
+        'PASSWORD': '0690',
+        'HOST': 'localhost',  # или адрес вашей базы данных
+        'PORT': '5432',  # порт, если используется нестандартный порт (обычно 5432)
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -124,10 +122,13 @@ IMPORT_EXPORT_USE_TRANSACTION = True
 
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     STATIC_DIR,
 ]
+
+MEDIA_ROOT = Path(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
