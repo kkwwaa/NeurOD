@@ -78,4 +78,3 @@ admin.site.register(NumericQuestion, NumericQuestionAdmin)
 admin.site.register(PatientNumericAnswer)
 admin.site.register(PatientAnswer)
 admin.site.register(ProbsImage)
-
