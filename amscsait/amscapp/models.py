@@ -1,8 +1,8 @@
 from datetime import date
 from enum import Enum
 from django.core import validators
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.html import mark_safe
+from django.core.validators import MinValueValidator
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.db import models
@@ -18,6 +18,11 @@ class Block(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Блок"
+        verbose_name_plural = "Блоки"
+
 class Modality(models.Model):
     name = models.CharField(max_length=100)
     block = models.ForeignKey(Block, on_delete=models.CASCADE, null=True, blank=True)
@@ -25,8 +30,13 @@ class Modality(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Модальность"
+        verbose_name_plural = "Модальности"
+
 class Question(models.Model):
     type_ = QuestionType.POLL
+    num = models.IntegerField("Номер вопроса", null=True, blank=True)
     question_text = models.CharField("Текст вопроса", max_length=100)
     proba = models.ForeignKey(to="Probs", on_delete=models.CASCADE)
     modality = models.ManyToManyField(Modality)
@@ -38,8 +48,8 @@ class Question(models.Model):
         return self.question_text
 
     class Meta:
-        verbose_name = "Вопрос с выбором ответа"
-        verbose_name_plural = "Вопросы с выбором ответа"
+        verbose_name = "Качественный вопрос"
+        verbose_name_plural = "Качественные вопросы"
 
 
 class Option(models.Model):
@@ -58,8 +68,9 @@ class Option(models.Model):
 
 class NumericQuestion(models.Model):
     question_text = models.CharField("Текст вопроса", max_length=100)
+    num = models.IntegerField("Номер вопроса", null=True, blank=True)
     proba = models.ForeignKey(to="Probs", on_delete=models.CASCADE)
-    modality = models.ForeignKey(Modality, on_delete=models.CASCADE, null=True, blank=True)
+    modality = models.ManyToManyField(Modality)
     avg_value = models.FloatField("Среднее значение", null=True, blank=True)
     min_value = models.FloatField("Минимальное значение", null=True, blank=True)
     max_value = models.FloatField("Максимальное значение", null=True, blank=True)
@@ -93,6 +104,10 @@ class Probs(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name = "Проба"
+        verbose_name_plural = "Пробы"
+
 
 @receiver(pre_save, sender=Probs)
 def set_block_from_modal(sender, instance, **kwargs):
@@ -102,6 +117,14 @@ def set_block_from_modal(sender, instance, **kwargs):
 class ProbsImage(models.Model):
     prob = models.ForeignKey(Probs, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='static/image/probs_img/')
+
+    def image_tag(self):
+        return mark_safe(f'<img src="{self.image.url}" alt="{self.prob.title}" style="max-width: 100%; height: auto;">')
+    image_tag.short_description = 'Image'
+
+    class Meta:
+        verbose_name = "Инструкция к пробе"
+        verbose_name_plural = "Инструкции к пробам"
 
 class PatientAnswer(models.Model):
     patient = models.ForeignKey(to="Patient", on_delete=models.CASCADE)
@@ -176,6 +199,3 @@ class Patient(models.Model):
         verbose_name = "Пациент"
         verbose_name_plural = "Пациенты"
         db_table = "amscapp_patient"
-
-
-
