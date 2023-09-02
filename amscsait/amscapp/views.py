@@ -118,6 +118,8 @@ def generate_dataframe(results):
 def view_patient(request, pk):
     patient = get_object_or_404(Patient, pk=pk, user=request.user)
     modalities = Modality.objects.all()
+    questions = Question.objects.filter(modality__isnull=False).distinct()
+    num_questions = NumericQuestion.objects.filter(modality__isnull=False).distinct()
     results = []
     modality_names = []
     score_sums = []
@@ -153,6 +155,12 @@ def view_patient(request, pk):
 
         severity_num = []
         for answer in modality_numeric_answers:
+            proba = answer.proba
+            num = answer.num
+            if proba not in max_num_dict or num > max_num_dict[proba]:
+                max_num_dict[proba] = num
+
+        for answer in modality_numeric_answers:
             if answer.proba in max_num_dict and answer.num == max_num_dict[answer.proba]:
                 total_score += answer.answer
                 question = answer.question
@@ -160,8 +168,7 @@ def view_patient(request, pk):
 
                 if avg_value is not None:
                     std_dev = abs(question.max_value - question.min_value) / 4
-                    severity_num.append(
-                        (get_severity(answer.answer, avg_value, std_dev, question.rev), answer.created_at))
+                    severity_num.append((get_severity(answer.answer, avg_value, std_dev, question.rev), answer.created_at))
 
                 score_sum += score_severity(severity_num[-1][0])
                 answers.append(answer)
@@ -302,35 +309,35 @@ def proba(request, pk, proba_pk):
         for question in questions:
             answer_option_id = request.POST.get(f'question_{question.id}', None)
             if answer_option_id is not None:
-                modal = question.modality
-              
-                PatientAnswer.objects.create(
-                    patient_id=pk,
-                    question=question,
-                    option_id=answer_option_id,
-                    proba=proba,
-                    modal=modal,
-                    num=num,
-                )
+                for modal in question.modality.all():
+
+                    PatientAnswer.objects.create(
+                        patient_id=pk,
+                        question=question,
+                        option_id=answer_option_id,
+                        proba=proba,
+                        modal=modal,
+                        num=num,
+                    )
 
         for numeric_question in numeric_questions:
-            total_sum = 0  
+            total_sum = 0
             for option in numeric_question.options.all():
                 numeric_answer_value = request.POST.get(f'numeric_question_{numeric_question.id}_{option.id}', None)
                 if numeric_answer_value is not None:
-                    modal = numeric_question.modality
-                    total_sum += int(numeric_answer_value) * option.coefficient
+                    for modal in numeric_question.modality.all():
+                        total_sum = int(numeric_answer_value) * option.coefficient
 
-            PatientNumericAnswer.objects.create(
-                patient_id=pk,
-                question=numeric_question,
-                answer=total_sum,
-                proba=proba,
-                modal=modal,
-                num=num1,
-            )
+                        PatientNumericAnswer.objects.create(
+                            patient_id=pk,
+                            question=numeric_question,
+                            answer=total_sum,
+                            proba=proba,
+                            modal=modal,  # Здесь modal - объект Modality
+                            num=num1,
+                        )
 
-        return redirect('probs_list', pk=pk)  
+        return redirect('probs_list', pk=pk)
 
     try:
         proba_image = ProbsImage.objects.get(prob=proba)
@@ -339,9 +346,9 @@ def proba(request, pk, proba_pk):
 
     context = {
         'prob': proba,
-        'questions': questions,
         'proba_image': proba_image,
-        'numeric_questions': numeric_questions,
+        'questions': sorted(questions, key=lambda q: (q.num if q.num is not None else float('inf'))),
+        'numeric_questions': sorted(numeric_questions, key=lambda q: (q.num if q.num is not None else float('inf'))),
     }
 
     return render(request, 'amscapp/proba_detail.html', context)
