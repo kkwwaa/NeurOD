@@ -86,6 +86,7 @@ def generate_dataframe(results):
             if hasattr(answer, 'option'):
                 row = {
                     'Проба': answer.proba,
+                    'Результаты пробы': '<a href="/patient/{}/probs_results/{}">Просмотреть результаты</a>'.format(answer.patient.pk, answer.proba.slug),
                     'Вопрос': answer.question,
                     'Ответ': answer.option,
                     'Кол-во баллов': answer.option.score,
@@ -94,6 +95,7 @@ def generate_dataframe(results):
             else:
                 row = {
                     'Проба': answer.proba,
+                    'Результаты пробы': '<a href="/patient/{}/probs_results/{}">Просмотреть результаты</a>'.format(answer.patient.pk, answer.proba.slug),
                     'Вопрос': answer.question,
                     'Ответ': answer.answer,
                     'Кол-во баллов': answer.answer,
@@ -102,6 +104,7 @@ def generate_dataframe(results):
             data.append(row)
         row = {
             'Проба': '',
+            'Результаты проб': '',
             'Вопрос': '',
             'Ответ': 'Итого:',
             'Кол-во баллов': result['total_score'],
@@ -110,6 +113,7 @@ def generate_dataframe(results):
         data.append(row)
 
     df = pd.DataFrame(data)
+    df.fillna('', inplace=True)
     df.loc[df['Проба'].duplicated(), 'Проба'] = ''
     return df
 
@@ -181,6 +185,7 @@ def view_patient(request, pk):
 
         result = {
             "modality": modality,
+            'pk': pk,
             "answers": answers,
             "total_score": total_score,
             "severity_list": [(answer, severity) for answer, severity in zip(answers, severity)],
@@ -193,7 +198,7 @@ def view_patient(request, pk):
         df = generate_dataframe([result])
 
         # Преобразование DataFrame в HTML
-        html_table = df.to_html(index=False, classes="table")
+        html_table = df.to_html(index=False, classes="table", escape=False)
 
         # Добавление таблицы в словарь по ключу модальности
         html_tables[modality] = html_table
@@ -239,9 +244,9 @@ def view_patient(request, pk):
 
 
 @login_required
-def probs_results(request, pk, modal):
+def probs_results(request, pk, slug):
     patient = get_object_or_404(Patient, pk=pk)
-    probs = patient.patientanswer_set.filter(modal_id=modal).values_list('proba', flat=True).distinct()
+    proba = Probs.objects.filter(slug=slug).first()
     results = []
 
     if request.method == 'POST':
@@ -251,31 +256,34 @@ def probs_results(request, pk, modal):
             PatientAnswer.objects.filter(patient_id=pk, proba=prob_to_delete, num=num).delete()
             PatientNumericAnswer.objects.filter(patient_id=pk, proba=prob_to_delete, num=num).delete()
 
-    for proba in probs:
-        nums = patient.patientanswer_set.filter(proba=proba).values_list('num', flat=True).distinct()
-        for num in nums:
-            proba_answers = patient.patientanswer_set.filter(proba=proba, num=num)
-            total_score = proba_answers.aggregate(total_score=Sum("option__score"))["total_score"]
-            total_score = total_score if total_score is not None else 0
-            numeric_answers = patient.patientnumericanswer_set.filter(proba=proba, num=num)
-            numeric_total_score = numeric_answers.aggregate(total_score=Sum("answer"))["total_score"]
-            numeric_total_score = numeric_total_score if numeric_total_score is not None else 0
-            proba1 = Probs.objects.get(pk=proba)
+    num1 = patient.patientanswer_set.filter(proba=proba.pk).values_list('num', flat=True).distinct()
+    if num1:
+        nums=num1
+    else:
+        nums = patient.patientnumericanswer_set.filter(proba=proba.pk).values_list('num', flat=True).distinct()
+    for num in nums:
+        proba_answers = patient.patientanswer_set.filter(proba=proba, num=num)
+        total_score = proba_answers.aggregate(total_score=Sum("option__score"))["total_score"]
+        total_score = total_score if total_score is not None else 0
+        numeric_answers = patient.patientnumericanswer_set.filter(proba=proba, num=num)
+        numeric_total_score = numeric_answers.aggregate(total_score=Sum("answer"))["total_score"]
+        numeric_total_score = numeric_total_score if numeric_total_score is not None else 0
+        proba1 = Probs.objects.get(pk=proba.pk)
 
-            result = {
-                "num": num,
-                "proba": proba1,
-                'proba_pk': proba,
-                "answers": proba_answers,
-                "numeric_answers": numeric_answers,
-                "total_score": total_score + numeric_total_score,
-            }
-            results.append(result)
+        result = {
+            "num": num,
+            "proba": proba1,
+            'proba_pk': proba,
+            "answers": proba_answers,
+            "numeric_answers": numeric_answers,
+            "total_score": total_score + numeric_total_score,
+        }
+        results.append(result)
 
     return render(
         request,
         "amscapp/probs_results.html",
-        {"results": results},
+        {"results": results, 'nums': nums, 'proba': proba},
     )
 
 
