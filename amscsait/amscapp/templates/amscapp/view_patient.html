@@ -50,9 +50,6 @@
         <h2>Параметры оценки функции: {{ modality.name }}</h2>
         {{ html_table|safe }}
     </div>
-    <div>
-        <a class="btn btn-primary btn-block" href="{% url 'probs_results' pk=patient.pk modal=modality.pk %}">Результаты проб</a>
-    </div>
     {% endfor %}
 
     <style>
