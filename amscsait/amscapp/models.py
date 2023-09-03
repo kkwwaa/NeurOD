@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from django.urls import reverse
 from django.core import validators
 from django.utils.html import mark_safe
 from django.core.validators import MinValueValidator
@@ -7,6 +8,8 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
+from unidecode import unidecode
 
 class QuestionType(Enum):
     POLL = 'poll'
@@ -100,6 +103,17 @@ class Probs(models.Model):
     title = models.CharField(max_length=255)
     modal = models.ForeignKey(Modality, on_delete=models.CASCADE)
     block = models.ForeignKey(Block, on_delete=models.CASCADE, blank=True, null=True)
+    slug = models.SlugField(unique=True, blank=True)
+
+    def get_results_url(self):
+        return reverse('probs_results', kwargs={'pk': self.pk, 'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        # Преобразуем название пробы в английский алфавит и создаем слаг
+        if not self.slug:
+            english_title = unidecode(self.title)  # Преобразуем название в английский
+            self.slug = slugify(english_title)
+        super(Probs, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title
