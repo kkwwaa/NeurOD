@@ -37,7 +37,13 @@
             {% csrf_token %}
             <input type="hidden" name="prob_to_delete" value="{{ result.proba.id }}">
             <input type="hidden" name="num" value="{{ result.num }}">
-            <button class="btn btn-danger" type="submit">Удалить результаты пробы</button>
+            <div class="d-flex">
+                <button class="btn btn-danger" type="submit">Удалить результаты пробы</button>
+                <div style="margin-left: 20px;">
+                    <a class="btn btn-primary btn-block" href="{% url 'view_patient' pk=pk %}">Вернуться к пациенту</a>
+                </div>
+            </div>
+
         </form>
         {% endfor %}
         <div class="mt-5"></div>
