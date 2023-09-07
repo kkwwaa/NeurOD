@@ -89,7 +89,7 @@ def generate_dataframe(results):
                     'Результаты пробы': '<a href="/patient/{}/probs_results/{}">Просмотреть результаты</a>'.format(answer.patient.pk, answer.proba.slug),
                     'Вопрос': answer.question,
                     'Ответ': answer.option,
-                    'Кол-во баллов': answer.option.score,
+                    'Кол-во баллов': answer.num,
                     'Оценка тяжести': severity[0],
                 }
             else:
@@ -98,13 +98,12 @@ def generate_dataframe(results):
                     'Результаты пробы': '<a href="/patient/{}/probs_results/{}">Просмотреть результаты</a>'.format(answer.patient.pk, answer.proba.slug),
                     'Вопрос': answer.question,
                     'Ответ': answer.answer,
-                    'Кол-во баллов': answer.answer,
+                    'Кол-во баллов': answer.num,
                     'Оценка тяжести': severity[0],
                 }
             data.append(row)
         row = {
             'Проба': '',
-            'Результаты проб': '',
             'Вопрос': '',
             'Ответ': 'Итого:',
             'Кол-во баллов': result['total_score'],
@@ -283,7 +282,7 @@ def probs_results(request, pk, slug):
     return render(
         request,
         "amscapp/probs_results.html",
-        {"results": results, 'nums': nums, 'proba': proba},
+        {"results": results, 'nums': nums, 'proba': proba, 'pk': pk},
     )
 
 
@@ -291,7 +290,23 @@ def probs_results(request, pk, slug):
 def probs_list(request, pk):
     modalities = Block.objects.all()
     probs = Probs.objects.all()
-    return render(request, 'amscapp/probs_list.html', {'modalities': modalities, 'probs': probs, 'pk': pk})
+
+    # Определите переменную для поискового запроса
+    search_query = request.GET.get('search', '')
+
+    # Фильтруйте и сортируйте пробы в зависимости от наличия поискового запроса и значения sort
+    sort = request.GET.get('sort', 'title')  # По умолчанию сортировка по полю title
+
+    if search_query:
+        probs = probs.filter(title__icontains=search_query)
+
+    if sort == 'numer':
+        probs = probs.order_by('numer')
+    else:
+        probs = probs.order_by('title')
+
+
+    return render(request, 'amscapp/probs_list.html', {'modalities': modalities, 'probs': probs, 'pk': pk, 'search_query': search_query})
 
 
 @login_required
@@ -309,8 +324,8 @@ def proba(request, pk, proba_pk):
         num = (PatientAnswer.objects.filter(patient_id=pk, proba=proba).count()) // (
             Question.objects.filter(proba=proba).count())
     if NumericQuestion.objects.filter(proba=proba).count() != 0:
-        num1 = (PatientNumericAnswer.objects.filter(patient_id=pk, proba=proba).count()) // (
-            NumericQuestion.objects.filter(proba=proba).count())
+        num1 = int((PatientNumericAnswer.objects.filter(patient_id=pk, proba=proba).count()) // (
+            NumericQuestion.objects.filter(proba=proba).count()))
 
     if request.method == 'POST':
 
