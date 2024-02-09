@@ -25,7 +25,7 @@ docker compose exec web python /app/manage.py collectstatic
 <h3>View patient</h3>
 <img src='https://github.com/kkwwaa/NeurOD/assets/120415812/8c42e23b-6b97-4834-82b1-7c1432c0a08a' alt='view'>
 <h3>Exam</h3>
-<img src='https://github.com/kkwwaa/NeurOD/assets/120415812/62697967-93fe-4be2-808e-7a4916f50718' alt='exam'>
+<img src='[https://github.com/kkwwaa/NeurOD/blob/main/amscsait/static/image/collage.png' alt='exam'>
 <h3>Tables</h3>
 <img src='https://github.com/kkwwaa/NeurOD/assets/120415812/ebb03d51-62ff-4c4c-a873-f37fe23efb48' alt='tables'>
 <h3>Graph</h3>
